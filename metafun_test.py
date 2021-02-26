@@ -1,4 +1,3 @@
-import sys
 import inspect
 import pkgutil
 import importlib
@@ -7,15 +6,10 @@ import metafun
 
 
 def magic(module):
-    l = []
-    for pkg in pkgutil.walk_packages(module.__path__, f"{module.__name__}."):
-        if not pkg.ispkg:
-            importlib.import_module(pkg.name)
-            for name, obj in inspect.getmembers(sys.modules[pkg.name], inspect.isclass):
-                #print(f"{name = }   { obj = }")
-                l.append(obj)
-
-    [cls()() for cls in l]
+    for mod in pkgutil.walk_packages(module.__path__, f"{module.__name__}."):
+        if not mod.ispkg:   # All packages are modules, but not all modules are packages
+            imported_mod = importlib.import_module(mod.name)
+            [cls()() for name, cls in inspect.getmembers(imported_mod, inspect.isclass)]
 
 
 if __name__ == '__main__':
